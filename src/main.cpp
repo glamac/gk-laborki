@@ -82,8 +82,16 @@ GLuint mirrorInd[] = {
 	0, 2, 3
 };
 
-GLdouble plane_equation[] = {
-	0, 0, 1, 0
+GLfloat rect[] = {
+	0., 0., 0., 0.,
+	1., 0., 1., 0.,
+	0., 1., 0., 1.,
+	1., 1., 1., 1.
+};
+
+GLuint rectI[] = {
+	0,1,2,
+	1, 2, 3
 };
 
 int main()
@@ -122,6 +130,7 @@ int main()
 	
     text1.texUnit(shaderProgram, "tex0", 0);
 	VAO1.Unbind(); VBO1.Unbind(); EBO1.Unbind();
+
 
 	Shader lightShader("light_vert.glsl", "light_frag.glsl");
 	VAO lightVAO; lightVAO.Bind();
@@ -171,6 +180,38 @@ int main()
 
 	GLenum err;
 
+	Texture rectTexture("test.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+	Shader framebufferProgram("framebuffer.vert", "framebuffer.frag");
+	VAO rectVAO; rectVAO.Bind();
+	VBO rectVBO(rect, sizeof(rect));
+	EBO rectEBO(rectI, sizeof(rectI));
+	rectVAO.linkAttrib(rectVBO, 0, 2, 4*sizeof(float), (void*)0);
+	rectVAO.linkAttrib(rectVBO, 1, 2, 4*sizeof(float), (void*)(2*sizeof(float)));
+	rectTexture.texUnit(framebufferProgram, "screenTexture", 0);
+	rectVAO.Unbind(); rectVBO.Unbind(); rectEBO.Unbind();
+
+	GLuint FBO, RBO;
+
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	}
+	GLuint framebufferTexture;
+	glGenTextures(1, &framebufferTexture);
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 800, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
+	glGenRenderbuffers(1, &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 800);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -213,6 +254,15 @@ int main()
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, tableNumElements(indices), GL_UNSIGNED_INT, 0);
 		VAO1.Unbind();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		framebufferProgram.Activate();
+		rectVAO.Bind();
+		glDisable(GL_DEPTH_TEST);
+		glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+		glDrawElements(GL_TRIANGLES, tableNumElements(rectI), GL_UNSIGNED_INT, 0);
+		rectVAO.Unbind();
+		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
