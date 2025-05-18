@@ -1,8 +1,12 @@
 #include"shaderClass.h"
+#include <cstring>
 
+// tbh should be elsewhere, probably
 std::string get_file_contents(const char* filename)
 {
-	std::ifstream in(filename, std::ios::binary);
+	// hacky, but it works.
+	std::string fpath = "src/" + std::string{filename};
+	std::ifstream in(fpath, std::ios::binary);
 	if (in)
 	{
 		std::string contents;

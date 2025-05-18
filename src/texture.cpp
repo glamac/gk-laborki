@@ -7,10 +7,10 @@ Texture::Texture(const char* filename, GLenum texType, GLenum slot, GLenum forma
     type = texType;
 
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char *image_data = stbi_load(filename, &width, &height, &channels, 0); 
+	unsigned char *image_data = stbi_load(("src/" + std::string{filename}).c_str(), &width, &height, &channels, 0); 
 
     if (!image_data) {
-        printf("ERR: Failed to load texture '%s'.", filename);
+        printf("ERR: Failed to load texture '%s'.\n", filename);
     }
 
 	glGenTextures(1, &ID); 

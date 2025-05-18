@@ -2,7 +2,7 @@
 # from https://makefiletutorial.com/
 TARGET := main.out
 BUILD_DIR := ./build
-SRC_DIRS := .
+SRC_DIRS := ./src
 SRCS := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c')
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
