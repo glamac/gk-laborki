@@ -88,7 +88,6 @@ GLdouble plane_equation[] = {
 
 int main()
 {
-	std::cout << "STARTING PROGRAM\n";
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -101,7 +100,6 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-	std::cout << "STARTING PROGRAM\n";
 	glfwMakeContextCurrent(window);
 	gladLoadGL();
 	glViewport(0, 0, 800, 800);
@@ -133,7 +131,6 @@ int main()
 
 	lightVAO.Unbind(); lightVBO.Unbind(); lightEBO.Unbind();
 
-	std::cout << "STARTING PROGRAM\n";
 	Shader mirrShader("mirr_vert.glsl", "mirr_frag.glsl");
 	VAO mirrVAO; mirrVAO.Bind();
 	VBO mirrVBO(mirrorVert, sizeof(mirrorVert));
@@ -173,7 +170,6 @@ int main()
 	reflModel = glm::translate(reflModel, -2.f * planePos);
 
 	GLenum err;
-	std::cout << "STARTING PROGRAM\n";
 
 	while (!glfwWindowShouldClose(window))
 	{
