@@ -171,12 +171,44 @@ int main()
 
 	GLenum err;
 
+	GLfloat coverVert[] = {
+		-1.f, -1.f, 0.f, 0.f,
+		-1.f, 1.f, 0.f, 1.f,
+		1.f, -1.f, 1.f, 0.f,
+		1.f, 1.f, 1.f, 1.f
+	};
+
+	GLuint coverInd[] = {
+		0, 1, 2,
+		1, 2, 3
+	};
+
+	Texture cat("shrimp.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+	cat.Bind();
+	
+	Shader coverShader("cover_vert.glsl", "cover_frag.glsl");
+    cat.texUnit(coverShader, "screenTexture", 0);
+	VAO coverVAO; coverVAO.Bind();
+	VBO coverVBO(coverVert, sizeof(coverVert));
+	EBO coverEBO(coverInd, sizeof(coverInd));
+	coverVAO.linkAttrib(coverVBO, 0, 2, 4 * sizeof(float), (void*)0);
+	coverVAO.linkAttrib(coverVBO, 1, 2, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	coverVAO.Unbind(); coverVBO.Unbind(); coverEBO.Unbind();
+
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		//glClearColor(1.f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+		coverShader.Activate();
+		coverVAO.Bind();
+		glDrawElements(GL_TRIANGLES, tableNumElements(coverInd), GL_UNSIGNED_INT, 0);
+		coverVAO.Unbind();
+
+		/*
         Camera.Inputs(window);
 		Camera.updateMatrix(90.f, 0.1f, 10.f);
 		glEnable(GL_DEPTH_TEST);
@@ -213,6 +245,7 @@ int main()
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, tableNumElements(indices), GL_UNSIGNED_INT, 0);
 		VAO1.Unbind();
+		*/
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
